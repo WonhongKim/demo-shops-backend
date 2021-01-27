@@ -13,6 +13,7 @@ import * as Joi from 'joi';
 import { User } from './users/entities/user.entity';
 import { JwtModule } from './jwt/jwt.module';
 import { JwtMiddleware } from './jwt/jwt.middleware';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
@@ -34,6 +35,7 @@ import { JwtMiddleware } from './jwt/jwt.middleware';
     }),
     GraphQLModule.forRoot({
       autoSchemaFile: true,
+      context: ({ req }) => ({ user: req['user'] }),
     }),
     TypeOrmModule.forRoot({
       type: 'postgres',
@@ -51,6 +53,7 @@ import { JwtMiddleware } from './jwt/jwt.middleware';
     JwtModule.forRoot({
       tokenkey: process.env.TOKEN_KEY,
     }),
+    AuthModule,
   ],
   controllers: [],
   providers: [],
@@ -59,7 +62,7 @@ export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
     consumer.apply(JwtMiddleware).forRoutes({
       path: '/graphql',
-      method: RequestMethod.ALL,
+      method: RequestMethod.POST,
     });
   }
 }
