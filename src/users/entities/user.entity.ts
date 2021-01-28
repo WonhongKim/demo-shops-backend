@@ -5,10 +5,11 @@ import {
   registerEnumType,
 } from '@nestjs/graphql';
 import { CoreData } from 'src/core/entities/core.entity';
-import { BeforeInsert, BeforeUpdate, Column, Entity } from 'typeorm';
+import { BeforeInsert, BeforeUpdate, Column, Entity, OneToMany } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { InternalServerErrorException } from '@nestjs/common';
 import { IsEmail, IsEnum, IsString } from 'class-validator';
+import { Shops } from 'src/shops/entities/shops.entity';
 
 export enum Role {
   Admin = 'Admin',
@@ -42,6 +43,13 @@ export class User extends CoreData {
   @Field(() => Role)
   @IsEnum(Role)
   role: Role;
+
+  @Field(() => [Shops])
+  @OneToMany(
+    () => Shops,
+    shops => shops.malltype,
+  )
+  shops: Shops[];
 
   @BeforeInsert()
   @BeforeUpdate()

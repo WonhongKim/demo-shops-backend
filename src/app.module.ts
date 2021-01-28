@@ -14,6 +14,9 @@ import { User } from './users/entities/user.entity';
 import { JwtModule } from './jwt/jwt.module';
 import { JwtMiddleware } from './jwt/jwt.middleware';
 import { AuthModule } from './auth/auth.module';
+import { ShopsModule } from './shops/shops.module';
+import { MallType } from './shops/entities/mallType.entity';
+import { Shops } from './shops/entities/shops.entity';
 
 @Module({
   imports: [
@@ -46,7 +49,7 @@ import { AuthModule } from './auth/auth.module';
       database: process.env.DB_NAME,
       synchronize: process.env.NODE_ENV !== 'production',
       logging: process.env.NODE_ENV !== 'production',
-      entities: [User],
+      entities: [User, MallType, Shops],
     }),
     UsersModule,
     CoreModule,
@@ -54,6 +57,7 @@ import { AuthModule } from './auth/auth.module';
       tokenkey: process.env.TOKEN_KEY,
     }),
     AuthModule,
+    ShopsModule,
   ],
   controllers: [],
   providers: [],

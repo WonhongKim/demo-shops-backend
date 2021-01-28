@@ -3,6 +3,7 @@ import { Resolver, Query, Mutation, Args, Context } from '@nestjs/graphql';
 import { promises } from 'dns';
 import { AuthUser } from 'src/auth/auth-user.decorator';
 import { AuthGuard } from 'src/auth/auth.guard';
+import { UserRole } from 'src/auth/role.decorator';
 import {
   CreateAccountInput,
   CreateAccountOutput,
@@ -52,7 +53,6 @@ export class UsersResolver {
     return authUser;
   }
 
-  @UseGuards(AuthGuard)
   @Query(() => UserProfileOutPut)
   async getUserProfile(
     @Args() userProfileInput: UserProfileInput,
@@ -74,8 +74,8 @@ export class UsersResolver {
     }
   }
 
-  @UseGuards(AuthGuard)
   @Mutation(() => UpdateAccountOutPut)
+  @UserRole(['Any'])
   async updateAcccount(
     @AuthUser() authUser: User,
     @Args('input') updateAccountInput: UpdateAccountInput,
