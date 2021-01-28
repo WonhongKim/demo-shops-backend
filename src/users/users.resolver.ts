@@ -1,5 +1,6 @@
 import { UseGuards } from '@nestjs/common';
 import { Resolver, Query, Mutation, Args, Context } from '@nestjs/graphql';
+import { promises } from 'dns';
 import { AuthUser } from 'src/auth/auth-user.decorator';
 import { AuthGuard } from 'src/auth/auth.guard';
 import {
@@ -7,6 +8,11 @@ import {
   CreateAccountOutput,
 } from './dtos/create-account.dto';
 import { LoginInput, LoginOutput } from './dtos/login.dto';
+import {
+  UpdateAccountInput,
+  UpdateAccountOutPut,
+} from './dtos/update-account.dto';
+import { UserProfileInput, UserProfileOutPut } from './dtos/user-profile.dto';
 import { User } from './entities/user.entity';
 import { UsersService } from './users.service';
 
@@ -44,5 +50,46 @@ export class UsersResolver {
   @UseGuards(AuthGuard)
   me(@AuthUser() authUser: User) {
     return authUser;
+  }
+
+  @UseGuards(AuthGuard)
+  @Query(() => UserProfileOutPut)
+  async getUserProfile(
+    @Args() userProfileInput: UserProfileInput,
+  ): Promise<UserProfileOutPut> {
+    try {
+      const user = await this.usersService.findById(userProfileInput.userId);
+      if (!user) {
+        throw Error();
+      }
+      return {
+        result: Boolean(user),
+        user,
+      };
+    } catch (e) {
+      return {
+        error: 'User Not Found',
+        result: false,
+      };
+    }
+  }
+
+  @UseGuards(AuthGuard)
+  @Mutation(() => UpdateAccountOutPut)
+  async updateAcccount(
+    @AuthUser() authUser: User,
+    @Args('input') updateAccountInput: UpdateAccountInput,
+  ): Promise<UpdateAccountOutPut> {
+    try {
+      await this.usersService.updateAcccount(authUser.id, updateAccountInput);
+      return {
+        result: true,
+      };
+    } catch (e) {
+      return {
+        result: false,
+        error: 'Fail to update Account',
+      };
+    }
   }
 }

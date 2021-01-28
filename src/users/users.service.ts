@@ -7,6 +7,7 @@ import { User } from './entities/user.entity';
 import { ConfigService } from '@nestjs/config';
 import * as jwt from 'jsonwebtoken';
 import { JwtService } from 'src/jwt/jwt.service';
+import { UpdateAccountInput } from './dtos/update-account.dto';
 
 @Injectable()
 export class UsersService {
@@ -68,5 +69,22 @@ export class UsersService {
 
   async findById(id: number): Promise<User> {
     return await this.users.findOne({ id });
+  }
+
+  async updateAcccount(
+    userId: number,
+    { email, password, name }: UpdateAccountInput,
+  ): Promise<User> {
+    const user = await this.users.findOne(userId);
+    if (email) {
+      user.email = email;
+    }
+    if (password) {
+      user.password = password;
+    }
+    if (name) {
+      user.name = name;
+    }
+    return this.users.save(user);
   }
 }
