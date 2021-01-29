@@ -4,12 +4,12 @@ import { Column, Entity, OneToMany } from 'typeorm';
 import { IsString } from 'class-validator';
 import { Shops } from './shops.entity';
 
-@InputType('mallTypeEntity', { isAbstract: true })
+@InputType({ isAbstract: true })
 @ObjectType()
 @Entity()
 export class MallType extends CoreData {
-  @Column()
   @Field(() => String)
+  @Column({ unique: true })
   @IsString()
   name: string;
 
@@ -18,10 +18,15 @@ export class MallType extends CoreData {
   @IsString()
   coverImage: string;
 
-  @Field(() => [Shops])
+  @Field(() => String)
+  @Column({ unique: true })
+  @IsString()
+  slug: string;
+
+  @Field(type => [Shops], { nullable: true })
   @OneToMany(
-    () => Shops,
-    shops => shops.owner,
+    type => Shops,
+    shop => shop.malltype,
   )
   shops: Shops[];
 }

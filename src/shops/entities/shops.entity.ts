@@ -1,6 +1,6 @@
 import { Field, InputType, ObjectType } from '@nestjs/graphql';
 import { CoreData } from 'src/core/entities/core.entity';
-import { Column, Entity, ManyToOne } from 'typeorm';
+import { Column, Entity, ManyToOne, RelationId } from 'typeorm';
 import { IsString } from 'class-validator';
 import { MallType } from './mallType.entity';
 import { User } from 'src/users/entities/user.entity';
@@ -9,23 +9,23 @@ import { User } from 'src/users/entities/user.entity';
 @ObjectType()
 @Entity()
 export class Shops extends CoreData {
-  @Column()
   @Field(() => String)
+  @Column()
   @IsString()
   name: string;
 
-  @Column()
   @Field(() => String)
+  @Column()
   @IsString()
   address: string;
 
-  @Column()
   @Field(() => String)
+  @Column()
   @IsString()
   phoneNumber: string;
 
-  @Column({ nullable: true })
   @Field(() => String, { nullable: true })
+  @Column({ nullable: true })
   @IsString()
   coverImage: string;
 
@@ -44,4 +44,7 @@ export class Shops extends CoreData {
     { onDelete: 'CASCADE' },
   )
   owner: User;
+
+  @RelationId((shops: Shops) => shops.owner)
+  ownerId: number;
 }
