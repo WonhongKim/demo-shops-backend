@@ -5,7 +5,6 @@ import { CreateAccountInput } from './dtos/create-account.dto';
 import { LoginInput, LoginOutput } from './dtos/login.dto';
 import { User } from './entities/user.entity';
 import { ConfigService } from '@nestjs/config';
-import * as jwt from 'jsonwebtoken';
 import { JwtService } from 'src/jwt/jwt.service';
 import { UpdateAccountInput } from './dtos/update-account.dto';
 

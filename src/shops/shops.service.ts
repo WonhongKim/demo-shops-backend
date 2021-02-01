@@ -1,10 +1,14 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from 'src/users/entities/user.entity';
-import { Repository } from 'typeorm';
+import { Raw, Repository } from 'typeorm';
+import { AllMallTypeOutPut } from './dtos/all-mallType.dto';
 import { CreateShopsInPut, CreateShopsOutPut } from './dtos/create-shop.dto';
 import { DeleteShopsInPut, DeleteShopsOutPut } from './dtos/delete-shop.dto';
 import { EditShopsInPut, EditShopsOutPut } from './dtos/edit-shop.dto';
+import { mallTypeInput, mallTypeOutPut } from './dtos/mallType.dto';
+import { SearchShopsInput, SearchShopsOutput } from './dtos/search-shops.dto';
+import { ShopsInput, ShopsOutput } from './dtos/shops.dto';
 import { MallType } from './entities/mallType.entity';
 import { Shops } from './entities/shops.entity';
 import { MallTypeRepository } from './repositories/mallType.repository';
@@ -106,6 +110,102 @@ export class ShopsService {
       return {
         result: false,
         error: 'Could not delete restaurant.',
+      };
+    }
+  }
+
+  countShops(malltype: MallType) {
+    return this.shops.count({ malltype });
+  }
+
+  async allShops({ page }: ShopsInput): Promise<ShopsOutput> {
+    try {
+      const [shops, totalResults] = await this.shops.findAndCount({
+        skip: (page - 1) * 25,
+        take: 25,
+      });
+      return {
+        result: true,
+        ShopList: shops,
+        totalPages: Math.ceil(totalResults / 25),
+        totalResults,
+      };
+    } catch {
+      return {
+        result: false,
+        error: 'Could not load restaurants',
+      };
+    }
+  }
+
+  async searchShopsByName({
+    query,
+    page,
+  }: SearchShopsInput): Promise<SearchShopsOutput> {
+    try {
+      const [shops, totalResults] = await this.shops.findAndCount({
+        where: {
+          name: Raw(name => `${name} ILIKE '%${query}%'`),
+        },
+        skip: (page - 1) * 25,
+        take: 25,
+      });
+      return {
+        result: true,
+        shops,
+        totalResults,
+        totalPages: Math.ceil(totalResults / 25),
+      };
+    } catch {
+      return { result: false, error: 'Could not search for restaurants' };
+    }
+  }
+
+  // Mall Type Start
+
+  async allMallType(): Promise<AllMallTypeOutPut> {
+    try {
+      const mallTypes = await this.mallType.find();
+      return {
+        result: true,
+        mallTypes,
+      };
+    } catch {
+      return {
+        result: false,
+        error: 'Could not load categories',
+      };
+    }
+  }
+
+  async findMallTypeBySlug({
+    slug,
+    page,
+  }: mallTypeInput): Promise<mallTypeOutPut> {
+    try {
+      const mallType = await this.mallType.findOne({ slug });
+      if (!mallType) {
+        return {
+          result: false,
+          error: 'malltype not found',
+        };
+      }
+      const shops = await this.shops.find({
+        where: { malltype: mallType },
+        take: 25,
+        skip: (page - 1) * 25,
+      });
+      const totalResults = await this.countShops(mallType);
+      return {
+        result: true,
+        mallType,
+        shops,
+        totalPages: Math.ceil(totalResults / 25),
+      };
+    } catch {
+      return {
+        result: false,
+        error: 'Cannot load malltype',
       };
     }
   }

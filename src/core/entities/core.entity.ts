@@ -8,14 +8,14 @@ import {
 @ObjectType()
 export class CoreData {
   @PrimaryGeneratedColumn()
-  @Field(type => Number)
+  @Field(() => Number)
   id: number;
 
   @CreateDateColumn()
-  @Field(type => String)
+  @Field(() => String)
   createdDate: Date;
 
   @UpdateDateColumn()
-  @Field(type => String)
+  @Field(() => String)
   updatedDate: Date;
 }

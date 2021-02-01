@@ -23,9 +23,9 @@ export class MallType extends CoreData {
   @IsString()
   slug: string;
 
-  @Field(type => [Shops], { nullable: true })
+  @Field(() => [Shops], { nullable: true })
   @OneToMany(
-    type => Shops,
+    () => Shops,
     shop => shop.malltype,
   )
   shops: Shops[];

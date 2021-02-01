@@ -1,13 +1,7 @@
-import {
-  Field,
-  InputType,
-  ObjectType,
-  PartialType,
-  PickType,
-} from '@nestjs/graphql';
-import { number } from 'joi';
+import { Field, InputType, ObjectType, PartialType } from '@nestjs/graphql';
+
 import { CoreOutput } from 'src/core/dtos/coreoutput.dto';
-import { Shops } from '../entities/shops.entity';
+
 import { CreateShopsInPut } from './create-shop.dto';
 
 @InputType()

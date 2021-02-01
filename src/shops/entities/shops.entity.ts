@@ -1,9 +1,10 @@
 import { Field, InputType, ObjectType } from '@nestjs/graphql';
 import { CoreData } from 'src/core/entities/core.entity';
-import { Column, Entity, ManyToOne, RelationId } from 'typeorm';
+import { Column, Entity, ManyToOne, OneToMany, RelationId } from 'typeorm';
 import { IsString } from 'class-validator';
 import { MallType } from './mallType.entity';
 import { User } from 'src/users/entities/user.entity';
+import { Item } from './item.entity';
 
 @InputType('shopsEntity', { isAbstract: true })
 @ObjectType()
@@ -47,4 +48,11 @@ export class Shops extends CoreData {
 
   @RelationId((shops: Shops) => shops.owner)
   ownerId: number;
+
+  @Field(() => [Item])
+  @OneToMany(
+    () => Item,
+    item => item.shop,
+  )
+  items: Item[];
 }

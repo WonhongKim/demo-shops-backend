@@ -3,7 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Shops } from './entities/shops.entity';
 import { MallTypeRepository } from './repositories/mallType.repository';
-import { ShopsResolver } from './shops.resolver';
+import { MallTypeResolver, ShopsResolver } from './shops.resolver';
 import { ShopsService } from './shops.service';
 
 @Module({
@@ -11,6 +11,6 @@ import { ShopsService } from './shops.service';
     TypeOrmModule.forFeature([Shops, MallTypeRepository]),
     ConfigService,
   ],
-  providers: [ShopsService, ShopsResolver],
+  providers: [ShopsService, ShopsResolver, MallTypeResolver],
 })
 export class ShopsModule {}
