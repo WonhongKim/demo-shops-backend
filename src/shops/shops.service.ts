@@ -3,12 +3,17 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { User } from 'src/users/entities/user.entity';
 import { Raw, Repository } from 'typeorm';
 import { AllMallTypeOutPut } from './dtos/all-mallType.dto';
+import { CreateItemInput, CreateItemOutput } from './dtos/create-item.dto';
 import { CreateShopsInPut, CreateShopsOutPut } from './dtos/create-shop.dto';
+import { DeleteItemInput, DeleteItemOutput } from './dtos/delete-item.dto';
 import { DeleteShopsInPut, DeleteShopsOutPut } from './dtos/delete-shop.dto';
+import { EditItemInput, EditItemOutput } from './dtos/edit-item.dto';
 import { EditShopsInPut, EditShopsOutPut } from './dtos/edit-shop.dto';
 import { mallTypeInput, mallTypeOutPut } from './dtos/mallType.dto';
 import { SearchShopsInput, SearchShopsOutput } from './dtos/search-shops.dto';
+import { ShopInput, ShopOutput } from './dtos/shop.dto';
 import { ShopsInput, ShopsOutput } from './dtos/shops.dto';
+import { Item } from './entities/item.entity';
 import { MallType } from './entities/mallType.entity';
 import { Shops } from './entities/shops.entity';
 import { MallTypeRepository } from './repositories/mallType.repository';
@@ -19,6 +24,8 @@ export class ShopsService {
     @InjectRepository(Shops)
     private readonly shops: Repository<Shops>,
     private readonly mallType: MallTypeRepository,
+    @InjectRepository(Item)
+    private readonly items: Repository<Item>,
   ) {}
 
   async createShop(
@@ -99,7 +106,7 @@ export class ShopsService {
       if (owner.id !== shop.ownerId) {
         return {
           result: false,
-          error: "You can't delete a restaurant that you don't own",
+          error: "You can't delete a Shop that you don't own",
         };
       }
       await this.shops.delete(shopId);
@@ -109,7 +116,7 @@ export class ShopsService {
     } catch {
       return {
         result: false,
-        error: 'Could not delete restaurant.',
+        error: 'Could not delete Shop.',
       };
     }
   }
@@ -133,7 +140,28 @@ export class ShopsService {
     } catch {
       return {
         result: false,
-        error: 'Could not load restaurants',
+        error: 'Could not load shops',
+      };
+    }
+  }
+
+  async findShopById({ shopId }: ShopInput): Promise<ShopOutput> {
+    try {
+      const shop = await this.shops.findOne(shopId, { relations: ['items'] });
+      if (!shop) {
+        return {
+          result: false,
+          error: 'Restaurant not found',
+        };
+      }
+      return {
+        result: true,
+        shop,
+      };
+    } catch {
+      return {
+        result: false,
+        error: 'Could not find restaurant',
       };
     }
   }
@@ -157,7 +185,7 @@ export class ShopsService {
         totalPages: Math.ceil(totalResults / 25),
       };
     } catch {
-      return { result: false, error: 'Could not search for restaurants' };
+      return { result: false, error: 'Could not search for shop' };
     }
   }
 
@@ -173,7 +201,7 @@ export class ShopsService {
     } catch {
       return {
         result: false,
-        error: 'Could not load categories',
+        error: 'Could not load MallTypes',
       };
     }
   }
@@ -206,6 +234,106 @@ export class ShopsService {
       return {
         result: false,
         error: 'Cannot load malltype',
+      };
+    }
+  }
+
+  async createItem(
+    owner: User,
+    createIteminput: CreateItemInput,
+  ): Promise<CreateItemOutput> {
+    try {
+      const shop = await this.shops.findOne(createIteminput.shopId);
+      if (!shop) {
+        return {
+          result: false,
+          error: 'Restaurant not found',
+        };
+      }
+      if (owner.id !== shop.ownerId) {
+        return {
+          result: false,
+          error: "You can't do that.",
+        };
+      }
+      await this.items.save(this.items.create({ ...createIteminput, shop }));
+      return {
+        result: true,
+      };
+    } catch (error) {
+      console.log(error);
+      return {
+        result: false,
+        error: 'Could not create Item',
+      };
+    }
+  }
+
+  async editItem(
+    owner: User,
+    edititeminput: EditItemInput,
+  ): Promise<EditItemOutput> {
+    try {
+      const item = await this.items.findOne(edititeminput.itemId, {
+        relations: ['shop'],
+      });
+      if (!item) {
+        return {
+          result: false,
+          error: 'Item not found',
+        };
+      }
+      if (item.shop.ownerId !== owner.id) {
+        return {
+          result: false,
+          error: "You can't do that.",
+        };
+      }
+      await this.items.save([
+        {
+          id: edititeminput.itemId,
+          ...edititeminput,
+        },
+      ]);
+      return {
+        result: true,
+      };
+    } catch {
+      return {
+        result: false,
+        error: 'Could not delete item',
+      };
+    }
+  }
+
+  async deleteItem(
+    owner: User,
+    { itemId }: DeleteItemInput,
+  ): Promise<DeleteItemOutput> {
+    try {
+      const item = await this.items.findOne(itemId, {
+        relations: ['shop'],
+      });
+      if (!item) {
+        return {
+          result: false,
+          error: 'Item not found',
+        };
+      }
+      if (item.shop.ownerId !== owner.id) {
+        return {
+          result: false,
+          error: "You can't do that.",
+        };
+      }
+      await this.items.delete(itemId);
+      return {
+        result: true,
+      };
+    } catch {
+      return {
+        result: false,
+        error: 'Could not delete Item',
       };
     }
   }

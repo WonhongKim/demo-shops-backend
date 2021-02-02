@@ -17,6 +17,7 @@ import { AuthModule } from './auth/auth.module';
 import { ShopsModule } from './shops/shops.module';
 import { MallType } from './shops/entities/mallType.entity';
 import { Shops } from './shops/entities/shops.entity';
+import { Item } from './shops/entities/item.entity';
 
 @Module({
   imports: [
@@ -49,7 +50,7 @@ import { Shops } from './shops/entities/shops.entity';
       database: process.env.DB_NAME,
       synchronize: process.env.NODE_ENV !== 'production',
       logging: process.env.NODE_ENV !== 'production',
-      entities: [User, MallType, Shops],
+      entities: [User, MallType, Shops, Item],
     }),
     UsersModule,
     CoreModule,

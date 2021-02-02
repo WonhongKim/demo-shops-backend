@@ -20,6 +20,11 @@ import { Shops } from './entities/shops.entity';
 import { ShopsService } from './shops.service';
 import { ShopsInput, ShopsOutput } from './dtos/shops.dto';
 import { SearchShopsInput, SearchShopsOutput } from './dtos/search-shops.dto';
+import { Item } from './entities/item.entity';
+import { CreateItemInput, CreateItemOutput } from './dtos/create-item.dto';
+import { ShopInput, ShopOutput } from './dtos/shop.dto';
+import { EditItemInput, EditItemOutput } from './dtos/edit-item.dto';
+import { DeleteItemInput, DeleteItemOutput } from './dtos/delete-item.dto';
 
 @Resolver(() => Shops)
 export class ShopsResolver {
@@ -36,7 +41,7 @@ export class ShopsResolver {
 
   @Mutation(() => EditShopsOutPut)
   @UserRole(['Owner'])
-  async EidtShop(
+  async eidtShop(
     @AuthUser() authUser: User,
     @Args('input') editshopinput: EditShopsInPut,
   ): Promise<EditShopsOutPut> {
@@ -45,7 +50,7 @@ export class ShopsResolver {
 
   @Mutation(() => DeleteShopsOutPut)
   @UserRole(['Owner'])
-  async DeleteShop(
+  async deleteShop(
     @AuthUser() authUser: User,
     @Args('input') deleteshopsinput: DeleteShopsInPut,
   ): Promise<DeleteShopsOutPut> {
@@ -57,8 +62,13 @@ export class ShopsResolver {
     return this.shopsService.allShops(shopsinput);
   }
 
+  @Query(() => ShopOutput)
+  shopbyid(@Args('input') shopinput: ShopInput): Promise<ShopOutput> {
+    return this.shopsService.findShopById(shopinput);
+  }
+
   @Query(() => SearchShopsOutput)
-  searchRestaurant(
+  searchShops(
     @Args('input') searchshopsinput: SearchShopsInput,
   ): Promise<SearchShopsOutput> {
     return this.shopsService.searchShopsByName(searchshopsinput);
@@ -84,5 +94,37 @@ export class MallTypeResolver {
     @Args('input') malltypeinput: mallTypeInput,
   ): Promise<mallTypeOutPut> {
     return this.shopsService.findMallTypeBySlug(malltypeinput);
+  }
+}
+
+@Resolver(() => Item)
+export class ItemResolver {
+  constructor(private readonly shopsService: ShopsService) {}
+
+  @Mutation(() => CreateItemOutput)
+  @UserRole(['Owner'])
+  createItem(
+    @AuthUser() owner: User,
+    @Args('input') createiteminput: CreateItemInput,
+  ) {
+    return this.shopsService.createItem(owner, createiteminput);
+  }
+
+  @Mutation(() => EditItemOutput)
+  @UserRole(['Owner'])
+  editItem(
+    @AuthUser() owner: User,
+    @Args('input') edititeminput: EditItemInput,
+  ): Promise<EditItemOutput> {
+    return this.shopsService.editItem(owner, edititeminput);
+  }
+
+  @Mutation(() => DeleteItemOutput)
+  @UserRole(['Owner'])
+  deleteItem(
+    @AuthUser() owner: User,
+    @Args('input') deleteiteminput: DeleteItemInput,
+  ): Promise<DeleteItemOutput> {
+    return this.shopsService.deleteItem(owner, deleteiteminput);
   }
 }
