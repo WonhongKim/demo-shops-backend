@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Item } from 'src/shops/entities/item.entity';
 import { Shops } from 'src/shops/entities/shops.entity';
@@ -10,6 +10,14 @@ import { GetOrdersInput, GetOrdersOutput } from './dtos/get-orders.dto';
 import { EditOrderInput, EditOrderOutput } from './dtos/edit-order.dto';
 import { OrderItem } from './entities/order-item.entity';
 import { Order, OrderStatus } from './entities/order.entity';
+import {
+  PUB_SUB,
+  NEW_PENDING_ORDER,
+  NEW_PICKUP_ORDER,
+  NEW_ORDER_UPDATE,
+} from 'src/core/core.constants';
+import { PubSub } from 'graphql-subscriptions';
+import { TakeOrderInput, TakeOrderOutput } from './dtos/take-order.dto';
 
 @Injectable()
 export class OrdersService {
@@ -22,6 +30,7 @@ export class OrdersService {
     private readonly shops: Repository<Shops>,
     @InjectRepository(Item)
     private readonly items: Repository<Item>,
+    @Inject(PUB_SUB) private readonly pubSub: PubSub,
   ) {}
 
   async createOrder(
@@ -83,6 +92,9 @@ export class OrdersService {
           items: orderItems,
         }),
       );
+      await this.pubSub.publish(NEW_PENDING_ORDER, {
+        pendingOrders: { order, ownerId: shop.ownerId },
+      });
       return {
         result: true,
         orderId: order.id,
@@ -191,9 +203,7 @@ export class OrdersService {
     { id: orderId, status }: EditOrderInput,
   ): Promise<EditOrderOutput> {
     try {
-      const order = await this.orders.findOne(orderId, {
-        relations: ['shop'],
-      });
+      const order = await this.orders.findOne(orderId);
       if (!order) {
         return {
           result: false,
@@ -212,6 +222,7 @@ export class OrdersService {
       }
       if (user.role === Role.Owner) {
         if (
+          status !== OrderStatus.Ordered &&
           status !== OrderStatus.Accepted &&
           status !== OrderStatus.ReadyforPickup
         ) {
@@ -232,12 +243,19 @@ export class OrdersService {
           error: "You can't do that.",
         };
       }
-      await this.orders.save([
-        {
-          id: orderId,
-          status,
-        },
-      ]);
+      await this.orders.save({
+        id: orderId,
+        status,
+      });
+      const newOrder = { ...order, status };
+      if (user.role === Role.Owner) {
+        if (status === OrderStatus.ReadyforPickup) {
+          await this.pubSub.publish(NEW_PICKUP_ORDER, {
+            pkciupOrders: newOrder,
+          });
+        }
+      }
+      await this.pubSub.publish(NEW_ORDER_UPDATE, { orderUpdates: newOrder });
       return {
         result: true,
       };
@@ -245,6 +263,42 @@ export class OrdersService {
       return {
         result: false,
         error: 'Could not edit order.',
+      };
+    }
+  }
+
+  async takeOrder(
+    driver: User,
+    { id: orderId }: TakeOrderInput,
+  ): Promise<TakeOrderOutput> {
+    try {
+      const order = await this.orders.findOne(orderId);
+      if (!order) {
+        return {
+          result: false,
+          error: 'Order not found',
+        };
+      }
+      if (order.driver) {
+        return {
+          result: false,
+          error: 'This order already has a driver',
+        };
+      }
+      await this.orders.save({
+        id: orderId,
+        driver,
+      });
+      await this.pubSub.publish(NEW_ORDER_UPDATE, {
+        orderUpdates: { ...order, driver },
+      });
+      return {
+        result: true,
+      };
+    } catch {
+      return {
+        result: false,
+        error: 'Could not upate order.',
       };
     }
   }

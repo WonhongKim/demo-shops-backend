@@ -7,6 +7,7 @@ import { User } from './entities/user.entity';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from 'src/jwt/jwt.service';
 import { UpdateAccountInput } from './dtos/update-account.dto';
+import { UserProfileOutPut } from './dtos/user-profile.dto';
 
 @Injectable()
 export class UsersService {
@@ -66,8 +67,16 @@ export class UsersService {
     }
   }
 
-  async findById(id: number): Promise<User> {
-    return await this.users.findOne({ id });
+  async findById(id: number): Promise<UserProfileOutPut> {
+    try {
+      const user = await this.users.findOneOrFail({ id });
+      return {
+        result: true,
+        user,
+      };
+    } catch (error) {
+      return { result: false, error: 'User Not Found' };
+    }
   }
 
   async updateAcccount(
