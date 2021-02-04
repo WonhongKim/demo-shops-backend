@@ -5,29 +5,29 @@ import { CoreData } from 'src/core/entities/core.entity';
 import { Column, Entity, ManyToOne, RelationId } from 'typeorm';
 import { Shops } from './shops.entity';
 
+@InputType('OptionsInputType', { isAbstract: true })
+@ObjectType()
+export class ItemOptionsSubItem {
+  @Field(() => String)
+  name: string;
+  @Field(() => Int, { nullable: true })
+  extra?: number;
+}
+
 @InputType('ItemOptionType', { isAbstract: true })
 @ObjectType()
-class ItemOtion {
+export class ItemOption {
   @Field(() => String)
   name: string;
 
   @Field(() => [ItemOptionsSubItem], { nullable: true })
-  options?: ItemOptionsSubItem[];
+  choices?: ItemOptionsSubItem[];
 
   @Field(() => Int, { nullable: true })
-  extraprice?: number;
+  extra?: number;
 }
 
-@InputType('OptionsInputType', { isAbstract: true })
-@ObjectType()
-class ItemOptionsSubItem {
-  @Field(() => String)
-  name: string;
-  @Field(() => Int, { nullable: true })
-  extraprice?: number;
-}
-
-@InputType('Item', { isAbstract: true })
+@InputType('ItemEntity', { isAbstract: true })
 @ObjectType()
 @Entity()
 export class Item extends CoreData {
@@ -45,7 +45,7 @@ export class Item extends CoreData {
   @Field(() => String)
   @Column({ nullable: true })
   @IsString()
-  photourl: string;
+  photourl?: string;
 
   @Field(() => String)
   @Column()
@@ -63,7 +63,7 @@ export class Item extends CoreData {
   @RelationId((item: Item) => item.shop)
   shopId: number;
 
-  @Field(() => [ItemOtion], { nullable: true })
+  @Field(() => [ItemOption], { nullable: true })
   @Column({ type: 'json', nullable: true })
-  options: ItemOtion[];
+  options?: ItemOption[];
 }

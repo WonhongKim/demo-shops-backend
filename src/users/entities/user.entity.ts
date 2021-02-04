@@ -10,6 +10,7 @@ import * as bcrypt from 'bcrypt';
 import { InternalServerErrorException } from '@nestjs/common';
 import { IsEmail, IsEnum, IsString } from 'class-validator';
 import { Shops } from 'src/shops/entities/shops.entity';
+import { Order } from 'src/orders/entities/order.entity';
 
 export enum Role {
   Admin = 'Admin',
@@ -20,7 +21,7 @@ export enum Role {
 
 registerEnumType(Role, { name: 'Role' });
 
-@InputType({ isAbstract: true })
+@InputType('UserEntity', { isAbstract: true })
 @ObjectType()
 @Entity()
 export class User extends CoreData {
@@ -50,6 +51,20 @@ export class User extends CoreData {
     shops => shops.malltype,
   )
   shops: Shops[];
+
+  @Field(() => [Order])
+  @OneToMany(
+    () => Order,
+    order => order.customer,
+  )
+  orders: Order[];
+
+  @Field(() => [Order])
+  @OneToMany(
+    () => Order,
+    order => order.driver,
+  )
+  rides: Order[];
 
   @BeforeInsert()
   @BeforeUpdate()

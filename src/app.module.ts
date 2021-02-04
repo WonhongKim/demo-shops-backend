@@ -18,6 +18,9 @@ import { ShopsModule } from './shops/shops.module';
 import { MallType } from './shops/entities/mallType.entity';
 import { Shops } from './shops/entities/shops.entity';
 import { Item } from './shops/entities/item.entity';
+import { OrdersModule } from './orders/orders.module';
+import { Order } from './orders/entities/order.entity';
+import { OrderItem } from './orders/entities/order-item.entity';
 
 @Module({
   imports: [
@@ -50,7 +53,7 @@ import { Item } from './shops/entities/item.entity';
       database: process.env.DB_NAME,
       synchronize: process.env.NODE_ENV !== 'production',
       logging: process.env.NODE_ENV !== 'production',
-      entities: [User, MallType, Shops, Item],
+      entities: [User, MallType, Shops, Item, Order, OrderItem],
     }),
     UsersModule,
     CoreModule,
@@ -59,6 +62,7 @@ import { Item } from './shops/entities/item.entity';
     }),
     AuthModule,
     ShopsModule,
+    OrdersModule,
   ],
   controllers: [],
   providers: [],

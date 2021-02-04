@@ -4,7 +4,7 @@ import { Column, Entity, OneToMany } from 'typeorm';
 import { IsString } from 'class-validator';
 import { Shops } from './shops.entity';
 
-@InputType({ isAbstract: true })
+@InputType('MallTypeEntity', { isAbstract: true })
 @ObjectType()
 @Entity()
 export class MallType extends CoreData {

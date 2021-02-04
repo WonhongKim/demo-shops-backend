@@ -5,6 +5,7 @@ import { IsString } from 'class-validator';
 import { MallType } from './mallType.entity';
 import { User } from 'src/users/entities/user.entity';
 import { Item } from './item.entity';
+import { Order } from 'src/orders/entities/order.entity';
 
 @InputType('shopsEntity', { isAbstract: true })
 @ObjectType()
@@ -55,4 +56,11 @@ export class Shops extends CoreData {
     item => item.shop,
   )
   items: Item[];
+
+  @Field(() => [Order])
+  @OneToMany(
+    () => Order,
+    order => order.shop,
+  )
+  orders: Order[];
 }
