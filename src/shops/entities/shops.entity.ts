@@ -35,7 +35,7 @@ export class Shops extends CoreData {
   @ManyToOne(
     () => MallType,
     malltype => malltype.shops,
-    { nullable: true, onDelete: 'SET NULL' },
+    { nullable: true, onDelete: 'SET NULL',eager: true },
   )
   malltype: MallType;
 

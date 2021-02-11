@@ -33,7 +33,7 @@
     "bcrypt": "^5.0.0",
     "class-validator": "^0.13.1",
     "cross-env": "^7.0.3",
-    "graphql": "^15.4.0",
+    "graphql": "^15.5.0",
     "graphql-subscriptions": "^1.1.0",
     "graphql-tools": "^7.0.2",
     "joi": "^17.3.0",
@@ -66,6 +66,10 @@
     "tsconfig-paths": "^3.9.0",
     "typescript": "^3.7.4"
   },
+  "resolutions": {
+    "graphql": "^15.5.0",
+    "**/graphql": "^15.5.0"
+    },
   "jest": {
     "moduleFileExtensions": [
       "js",

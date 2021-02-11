@@ -261,7 +261,6 @@ export class ShopsService {
         result: true,
       };
     } catch (error) {
-      console.log(error);
       return {
         result: false,
         error: 'Could not create Item',
