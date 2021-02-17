@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { promises } from 'dns';
 import { User } from 'src/users/entities/user.entity';
 import { Raw, Repository } from 'typeorm';
 import { AllMallTypeOutPut } from './dtos/all-mallType.dto';
@@ -10,6 +11,8 @@ import { DeleteShopsInPut, DeleteShopsOutPut } from './dtos/delete-shop.dto';
 import { EditItemInput, EditItemOutput } from './dtos/edit-item.dto';
 import { EditShopsInPut, EditShopsOutPut } from './dtos/edit-shop.dto';
 import { mallTypeInput, mallTypeOutPut } from './dtos/mallType.dto';
+import { MyShopInPut, MyShopOutPut } from './dtos/my-shop.dto';
+import { MyShopsOutPut } from './dtos/my-shops.dto';
 import { SearchShopsInput, SearchShopsOutput } from './dtos/search-shops.dto';
 import { ShopInput, ShopOutput } from './dtos/shop.dto';
 import { ShopsInput, ShopsOutput } from './dtos/shops.dto';
@@ -186,6 +189,43 @@ export class ShopsService {
       };
     } catch {
       return { result: false, error: 'Could not search for shop' };
+    }
+  }
+
+  async myShops(owner: User): Promise<MyShopsOutPut> {
+    try {
+      const myShops = await this.shops.find({ owner });
+      if (myShops) {
+        return {
+          result: true,
+          myShops,
+        };
+      }
+    } catch {
+      return {
+        result: false,
+        error: 'Fail to load my shop list',
+      };
+    }
+  }
+
+  async myShop(owner: User, { id }: MyShopInPut): Promise<MyShopOutPut> {
+    try {
+      const myShop = await this.shops.findOne(
+        { owner, id },
+        { relations: ['items', 'orders'] },
+      );
+      if (myShop) {
+        return {
+          myShop,
+          result: true,
+        };
+      }
+    } catch {
+      return {
+        result: false,
+        error: 'Fail to load my shop',
+      };
     }
   }
 

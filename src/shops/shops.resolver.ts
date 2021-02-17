@@ -25,6 +25,8 @@ import { CreateItemInput, CreateItemOutput } from './dtos/create-item.dto';
 import { ShopInput, ShopOutput } from './dtos/shop.dto';
 import { EditItemInput, EditItemOutput } from './dtos/edit-item.dto';
 import { DeleteItemInput, DeleteItemOutput } from './dtos/delete-item.dto';
+import { MyShopsOutPut } from './dtos/my-shops.dto';
+import { MyShopInPut, MyShopOutPut } from './dtos/my-shop.dto';
 
 @Resolver(() => Shops)
 export class ShopsResolver {
@@ -72,6 +74,21 @@ export class ShopsResolver {
     @Args('input') searchshopsinput: SearchShopsInput,
   ): Promise<SearchShopsOutput> {
     return this.shopsService.searchShopsByName(searchshopsinput);
+  }
+
+  @Query(() => MyShopsOutPut)
+  @UserRole(['Owner'])
+  myShops(@AuthUser() owner: User): Promise<MyShopsOutPut> {
+    return this.shopsService.myShops(owner);
+  }
+
+  @Query(() => MyShopOutPut)
+  @UserRole(['Owner'])
+  myShop(
+    @AuthUser() owner: User,
+    @Args('input') myshopInPut: MyShopInPut,
+  ): Promise<MyShopOutPut> {
+    return this.shopsService.myShop(owner, myshopInPut);
   }
 }
 

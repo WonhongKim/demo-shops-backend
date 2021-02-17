@@ -8,6 +8,7 @@ export class CreateItemInput extends PickType(Item, [
   'price',
   'description',
   'options',
+  'photourl',
 ]) {
   @Field(() => Int)
   shopId: number;
