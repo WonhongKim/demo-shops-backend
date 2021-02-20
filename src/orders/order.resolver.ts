@@ -65,7 +65,7 @@ export class OrdersResolver {
 
   // Subscription
 
-  @Subscription(() => Order, {
+  @Subscription(returns => Order, {
     filter: ({ pendingOrders: { ownerId } }, _, { user }) => {
       return ownerId === user.id;
     },
@@ -76,13 +76,13 @@ export class OrdersResolver {
     return this.pubSub.asyncIterator(NEW_PENDING_ORDER);
   }
 
-  @Subscription(() => Order)
+  @Subscription(returns => Order)
   @UserRole(['Staff'])
-  pkciupOrders() {
+  pickupOrders() {
     return this.pubSub.asyncIterator(NEW_PICKUP_ORDER);
   }
 
-  @Subscription(() => Order, {
+  @Subscription(returns => Order, {
     filter: (
       { orderUpdates: order }: { orderUpdates: Order },
       { input }: { input: OrderUpdatesInput },
@@ -91,13 +91,14 @@ export class OrdersResolver {
       if (
         order.driverId !== user.id &&
         order.customerId !== user.id &&
-        order.shop.id !== user.id
+        order.shop.ownerId !== user.id
       ) {
         return false;
       }
       return order.id === input.id;
     },
   })
+  @UserRole(['Any'])
   orderUpdates(@Args('input') orderUpdatesInput: OrderUpdatesInput) {
     return this.pubSub.asyncIterator(NEW_ORDER_UPDATE);
   }

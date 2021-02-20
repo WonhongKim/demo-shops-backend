@@ -231,7 +231,8 @@ export class OrdersService {
       if (user.role === Role.Staff) {
         if (
           status !== OrderStatus.Delivering &&
-          status !== OrderStatus.Delivered
+          status !== OrderStatus.Delivered &&
+          status !== OrderStatus.ReadyforPickup
         ) {
           canEdit = false;
         }
@@ -250,7 +251,7 @@ export class OrdersService {
       if (user.role === Role.Owner) {
         if (status === OrderStatus.ReadyforPickup) {
           await this.pubSub.publish(NEW_PICKUP_ORDER, {
-            pkciupOrders: newOrder,
+            pickupOrders: { ...order, status },
           });
         }
       }

@@ -131,13 +131,13 @@ export class ShopsService {
   async allShops({ page }: ShopsInput): Promise<ShopsOutput> {
     try {
       const [shops, totalResults] = await this.shops.findAndCount({
-        skip: (page - 1) * 25,
-        take: 25,
+        skip: (page - 1) * 6,
+        take: 6,
       });
       return {
         result: true,
         ShopList: shops,
-        totalPages: Math.ceil(totalResults / 25),
+        totalPages: Math.ceil(totalResults / 6),
         totalResults,
       };
     } catch {
@@ -178,14 +178,14 @@ export class ShopsService {
         where: {
           name: Raw(name => `${name} ILIKE '%${query}%'`),
         },
-        skip: (page - 1) * 25,
-        take: 25,
+        skip: (page - 1) * 6,
+        take: 6,
       });
       return {
         result: true,
         shops,
         totalResults,
-        totalPages: Math.ceil(totalResults / 25),
+        totalPages: Math.ceil(totalResults / 6),
       };
     } catch {
       return { result: false, error: 'Could not search for shop' };
@@ -260,15 +260,15 @@ export class ShopsService {
       }
       const shops = await this.shops.find({
         where: { malltype: mallType },
-        take: 25,
-        skip: (page - 1) * 25,
+        take: 6,
+        skip: (page - 1) * 6,
       });
       const totalResults = await this.countShops(mallType);
       return {
         result: true,
         mallType,
         shops,
-        totalPages: Math.ceil(totalResults / 25),
+        totalPages: Math.ceil(totalResults / 6),
       };
     } catch {
       return {
